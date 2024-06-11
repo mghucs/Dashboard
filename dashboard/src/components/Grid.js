@@ -1,39 +1,53 @@
-import React, { useState, useEffect } from "react";
-import { AgGridReact } from "ag-grid-react"; // React Grid Logic
-import "ag-grid-community/styles/ag-grid.css"; // Core CSS
-import "ag-grid-community/styles/ag-theme-quartz.css"; // Theme
+import React, { useState, useRef } from "react";
+import { AgGridReact } from "ag-grid-react"; 
+import "ag-grid-community/styles/ag-grid.css"; 
+import "ag-grid-community/styles/ag-theme-quartz.css"; 
 
-// Add pagination
-// Create new Grid component
-const Grid = () => {
-  // Row Data: The data to be displayed.
-  const [rowData, setRowData] = useState([
-    { make: "Tesla", model: "Model Y", price: 64950, electric: true },
-    { make: "Ford", model: "F-Series", price: 33850, electric: false },
-    { make: "Toyota", model: "Corolla", price: 29600, electric: false },
-  ]);
+function Grid({gridData}) {
   
-  // Column Definitions: Defines the columns to be displayed.
-  const [colDefs, setColDefs] = useState([
-    { field: "make" },
-    { field: "model" },
-    { field: "price" },
-    { field: "electric" }
+  const [colDefs] = useState([
+    { field: "Date" },
+    { field: "USD" },
+    { field: "CAD" },
   ]);
- 
-  // Container: Defines the grid's theme & dimensions.
+
+  // Ref to hold the grid instance
+  const gridRef = useRef(null);
+
+  // Function to save sorting state
+  const onSaveSortingState = () => {
+    const sortingState = gridRef.current.api.getColumnState();
+    // Save sorting state to localStorage
+    localStorage.setItem("sortingState", JSON.stringify(sortingState));
+    console.log(JSON.parse(localStorage.getItem("sortingState")))
+  };
+
+  // Function to load sorting state
+  const onLoadSortingState = () => {
+    const sortingState = JSON.parse(localStorage.getItem("sortingState"));
+    console.log(sortingState)
+    if (sortingState) {
+      gridRef.current.api.applyColumnState({
+        state: sortingState,
+        defaultState: { sort: null },
+      })
+    }
+  };
+  
   return (
-    <div
-      className="ag-theme-quartz" // applying the grid theme
-      style={{ height: 500 }} // the grid will fill the size of the parent container
-    >
-      <AgGridReact
-          rowData={rowData}
-          columnDefs={colDefs}
-      />
-    </div>
-  );
+      <div
+        className="ag-theme-quartz"
+        style={{ height: 500 }} 
+      >
+        <AgGridReact
+            ref={gridRef}
+            onSortChanged={onSaveSortingState}
+            onFirstDataRendered={onLoadSortingState}
+            rowData={gridData}
+            columnDefs={colDefs}
+        />
+      </div>
+    )
 };
 
-// Render Grid
 export {Grid}
