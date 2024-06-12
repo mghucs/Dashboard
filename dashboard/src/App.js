@@ -2,6 +2,14 @@ import './App.css';
 import React, { useState, useEffect } from 'react';
 import {Chart} from './components/Chart.js';
 import {Grid} from './components/Grid.js';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import Container from 'react-bootstrap/Container';
+import Tab from 'react-bootstrap/Tab';
+import Tabs from 'react-bootstrap/Tabs';
+
+const storeSelection = (selection) => { 
+  localStorage.setItem('tabSelection', selection);
+}
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -49,7 +57,8 @@ function App() {
         Object.entries(currencies).map(([date, conversion]) => ({
           Date: date,
           USD: conversion.USD,
-          CAD: conversion.CAD
+          CAD: conversion.CAD,
+          EUR: 1
         }))
       );
      
@@ -59,13 +68,20 @@ function App() {
     };
     fetchCurrencies();
   }, []);
-
   return (
     !loading ? (
-      <>
-        <Chart chartData={chartData} />
-        <Grid gridData={gridData} />
-      </>
+        <Container className='mw-99'>
+          <h2 className='text-center my-5'>Conversions</h2>
+          <Tabs defaultActiveKey={localStorage.getItem('tabSelection') || "Chart"}
+            onSelect={storeSelection}>
+            <Tab eventKey={"Chart"} title="Chart"> 
+              <Chart chartData={chartData}/>
+            </Tab>
+            <Tab eventKey={"Grid"} title="Grid">
+              <Grid gridData={gridData}/>
+            </Tab>
+          </Tabs>
+        </Container>
     ) : <></>
   );
 }
