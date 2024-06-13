@@ -18,7 +18,7 @@ def index(request):
     res = {}
     if existing_data.exists():
         for data in existing_data:
-            res[data.date] = {
+            res[data.date.strftime('%Y-%m-%d')] = {
                 "CAD": data.cad,
                 "USD": data.usd
             }
@@ -27,6 +27,8 @@ def index(request):
         url += f"{two_years.year}-{two_years.month:02}-{two_years.day:02}.."
         exchange_data = requests.get(url).json()['rates']
         for date, amount in exchange_data.items():
+            currency = Currency(date = date, usd = amount["USD"], cad = amount["CAD"])
+            currency.save()
             res[date] = {}
             for currency, rate in amount.items():
                 if currency == "CAD":
